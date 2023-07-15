@@ -11,6 +11,8 @@ They are inspired by and borrow from [Jae Yeon Kim's version](https://github.com
 [The R Project for Statistical Computing](https://www.r-project.org/about.html)   
 [R language definition](https://stat.ethz.ch/R-manual/R-devel/doc/manual/R-lang.html)  
 [Operators in R](https://www.javatpoint.com/r-operators)  
+[Data Science with R](https://garrettgman.github.io/)   
+
 ## Cheatsheet 
 [A collection of cheatsheet](https://posit.co/resources/cheatsheets/)  
 [R markdown cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf)  
