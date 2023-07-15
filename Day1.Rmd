@@ -233,10 +233,17 @@ list(a, b, c)
 ```
 
 #### Structure of a list    
+![Demo of a list](images/Demo-1.jpg)
 ```{r structure-of-a-list}
 # structure of a list 
 complicated_list <- list(1:2, c(1,2), "a", "b", c("a", "this is b"), zzz=c(xxx=1, "a", TRUE))
 str(complicated_list)
+
+complicated_list[6]
+complicated_list$zzz
+complicated_list[[6]]
+complicated_list[[6]][1]
+complicated_list[[6]][[1]]
 
 tr <- list(c(1,2), c(3,4))
 str(tr)
