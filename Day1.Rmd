@@ -1,0 +1,376 @@
+---
+title: 'Day1. Making Computational Methods Accessible: R Basics and Data Wrangling'
+author: "Amber Du"
+date: "July 15, 2023"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+# R and RStudio  
+## What is R and what is RStudio?  
+### R
+R is a programming language for statistical computing and graphics. You can consider it as an environment where techniques are implemented and it can be further extended via packages. You can download R at [CRAN (the comprehensive R archive network)](https://cran.rstudio.com).   
+
+### RStudio 
+RStudio is an IDE(Integrated Development Environment) for R. You can download RStudio at [this link](http://www.rstudio.com/download).  
+
+### Command line tool in R 
+```{r command-line-tool-in-r, eval=FALSE}
+cd
+mkdir 
+pwd
+echo
+head 
+more 
+```
+
+# Getting Started 
+**R Script**  
+**R Markdown**   
+
+## Operators   
+
+### Assignment Operators 
+Assignment operators include the left assignment operators: `<-`, `=`, `<<-` and right assignment operators: `->` and `->>`. In general, `<-` and `=` are not the same: `<-` can be used anywhere and the use of `=` is restricted. We will talk about their differences later, but `<-` is recommended. 
+```{r assignment-operators}
+a <- c(1,2,3) # numeric vector; c() [concatenation] is used to create a vector 
+a # view object a; call variable a 
+c(TRUE, FALSE) -> b
+b
+c <- c("a","b") # character vector
+c
+c(FALSE, 1) ->> d
+d
+```
+### Arithmetic Operators
+Arithmetic operators includes `+` (add), `-` (subtract), `*` (multiply), `/` (divide), `%%` (remainder), `^` (power), ... 
+```{r arithmetic-operators}
+a <- 2**3
+a
+(b<-2^3) # assign 2*3 to b and view the result 
+
+c(1,2)-2
+c(1,2,3,4,5,6)-c(1,2) # longer object length is a multiple of shorter length; vector recycling: will talk about this later 
+c(1,2) * c(2,3,4) # longer object length is not a multiple of shorter length 
+c(4,6,7) %%2
+```
+
+### Relational Operators 
+Relational operators includes `>` (greater than), `<` (less than), `==` (equal), `<=` (less than or equal to), `>=` (greater than or equal to), `!=` (unequal)
+```{r relational-operators}
+TRUE==1;FALSE==0 # use of semicolon for multiple commands on one line 
+c(1,2,3,4) <= c(2,3,4,5) 
+c(1,2,3,4) != c(2,3,4,5) 
+```
+### Miscellaneous Operators 
+```{r miscellaneous-operators}
+1:20 # a series of number in sequence 
+seq(1,20, by=2)
+rep(3,2) # repeat 3 twice 
+rep("repeat",5)
+7 %in% c(1,2,3,4,5)
+```
+## Working with R objects 
+```{r work-with-objects, eval=FALSE}
+ls() # list all the objects 
+rm(a) # remove object "a"
+rm(list=ls()) # clean up the environment 
+help(exp) # get help; this is the same as ?exp
+example(exp)
+getwd() # get working directory 
+setwd()  # set working directory
+```
+
+## Functions 
+### Built-in Functions 
+**Math functions**
+```{r math-functions}
+a <- c(-1,2)
+abs(a) # the absolute value of input "a"
+sqrt(4) # the square root of input "a"
+log(10) # the natural log of input "a"
+log10(10) # the common log of input "a"
+```
+**String functions** 
+```{r stirng-unctions}
+paste('one',2,'three', sep=', ') # concatenate vectors after converting to character 
+strsplit("This is a line.", " ") # split the elements of a character vector into substrings
+```
+**Statistical functions**
+Some useful statistical functions includes `max()`, `min()`, `sum()`, ...
+```{r statistical-functions}
+(r.x <- range(stats::rnorm(100)))
+```
+### User-defined functions  
+There are three steps in defining a function: its name, inputs and body. Writing a function has a few advantages compared with copy-and-paste. For example, as the requirement / goal changes, you only need to make update in the function, instead of in multiple places. 
+```{r user-defined-functions} 
+sum_v2 <- function(a,b) { # argument are not stored in Environment 
+  return(sum(a:b))
+}
+# stored under Functions in Environment 
+sum_v2(1,10)
+```
+## Packages in R 
+An R package is a collection of functions, data, and documentation that extends the capabilities of R. 
+```{r install-and-load-ggplot2, eval=FALSE}
+install.packages("ggplot2") # install 
+library(ggplot2) # load ggplot2 in Environment 
+
+packageVersion("ggplot2") # check the package version 
+packageVersion("dplyr")
+# update.packages("dplyr") update the package 
+
+pkgs <- c("ggplot2", "purrr")
+install.packages(pkgs)
+```
+## Vectors and augmented vectors in R  
+The section below for vectors and augmented vectors follows [Section 20 from R for Data Science](https://r4ds.had.co.nz/vectors.html?q=matrix#vectors)
+**Atomic vectors (homogeneous)**  
+Logical   
+Numeric: Integer, Double   
+Character    
+**Lists (heterogeneous)**   
+**Augmented vectors**   
+Factors   
+Dates and date-times   
+Tibbles   
+### Atomic vectors  
+```{r vectors-in-R}
+# atomic vectors 
+a <- c(1:10, NA) # 1 special values in a integer vector 
+b <- c("a", "b", "c")
+c <- c(1.2, 1.0, 2.22, NA, NaN, Inf, -Inf) # 4 special values in a double vector 
+is.na(NA); is.na(NaN)
+is.nan(NA); is.nan(NaN)
+d <- c(TRUE, FALSE, NA) # 3 possible values in a logical vector 
+typeof(a); class(a)
+typeof(b);length(b); class(b)
+typeof(c); class(c)
+typeof(d); class(d)
+
+
+# doubles
+sqrt(2) == 1.414214
+dplyr::near(sqrt(2), 1.414214, tol=0.001)
+```
+#### Add elements to a vector 
+```{r add-elements-to-a-vector}
+(a <- c(1:10, NA))
+(a <- c(a, 11))
+```
+#### Structure of atomic vector 
+```{r structure-of-atomic-vector}
+c(1, c(2, c(3, 4))) == c(1,2,3,4)
+```
+#### Coercion
+```{r vector-coercion}
+# explicit 
+as.logical("TRUE"); as.logical(0); as.logical(1); as.logical(3)
+as.integer(1.2); as.integer(1.5); as.integer(1.9)
+
+# implicit
+sum(c(TRUE, FALSE, FALSE)) # logical vector is coerced to an integer or double, `TRUE` becomes 1 and `FALSE` becomes 0
+mean(c(TRUE, FALSE, FALSE))
+1 < "2"
+
+set.seed(715)
+x <- rnorm(100)
+y <- x > 1.96 # which one in x is greater than 1.96
+mean(y) # what proportion in x is greater than 1.96
+
+typeof(1); typeof(1L)
+typeof(c(TRUE, 2L))
+typeof(c(2L, 3.8))
+typeof(c(3.8, "x")) # the most complex type wins: types from least to most complex are: logical, integer, double, and character. 
+```
+
+#### Check the type of vectors
+```{r check-type-of-vectors}
+double <- c(1,2,3)
+typeof(double)
+purrr::is_double(double)
+```
+
+#### Vector Recycling
+```{r vector-recycling}
+rchisq(100, df=2) > 1
+```
+
+#### Vector names 
+```{r vector-names}
+c(xx=1, yy=2, zz<-3) # compare with c(xx=1, yy=2, zz=3)
+
+x <- c(1,2,3)
+names(x)
+
+y <- c(xx=1,yy=2,zz=3)
+names(y)
+```
+#### Subsetting vectors  
+Index in R starts from 0 (vs. index in python starts from 0)  
+```{r}
+chr <- c("a", "b", "c")
+chr[1] # chr[4]
+chr[c(1,2)]
+chr[c(1,2,1,2)]
+chr[c(-1)] # do not select the value at position 1
+
+int <- c(1,2,3,4,5)
+int[int>1] # select the values that corresponds to TRUE
+
+int <- c(xx=1, yy=2, zz=3)
+int[c("xx")]
+```
+
+
+### List
+```{r list}
+#list 
+f <- list(1,2, "a", 1:10)
+length(f)
+list(a, b, c)
+```
+
+#### Structure of a list    
+```{r structure-of-a-list}
+# structure of a list 
+complicated_list <- list(1:2, c(1,2), "a", "b", c("a", "this is b"), zzz=c(xxx=1, "a", TRUE))
+str(complicated_list)
+
+tr <- list(c(1,2), c(3,4))
+str(tr)
+tr_2 <- list(list(1,2), list(3,4))
+str(tr_2)
+```
+#### Coercion 
+```{r coercion}
+int <- c(1,2,3,4,5,6)
+ls <- as.list(int)
+str(ls)
+
+int_back <- unlist(ls) # turn a list into an atomic vector
+str(int_back)
+```
+#### Subsetting list 
+```{r subsetting-list}
+# subsetting list 
+str(complicated_list[1:3]) # still a list 
+str(complicated_list[6])
+str(complicated_list[[6]]); str(complicated_list$zzz) # remove one level of hierarchy; these two are equivalent 
+str(complicated_list[[6]][1]); str(complicated_list[[6]][[1]])
+```
+#### Examples of list 
+```{r example-of-list}
+purrr::is_list(lm(mtcars$mpg ~ mtcars$cyl)) # linear models are lists 
+```
+### Factors 
+```{r factor}
+# factors 
+e <- factor(b, levels=c("a", "b", "c", "d")) # factor is a special type of vector; usually used in categorical data analysis 
+typeof(e); class(e) # integer; factor 
+str(e)
+attributes(e)
+```
+
+### Matrix  
+```{r matrix}
+mat <- matrix(c(1,2,3,4,5,6,7,8), nrow=2)
+mat
+typeof(mat)
+attributes(mat)
+t(mat)
+```
+#### Subsetting matrix 
+```{r subsetting matrix}
+mat[1,]
+mat[,1]
+```
+### Dates
+```{r dates}
+dat_time <- as.Date("1971-01-01")
+typeof(dat_time)
+attributes(dat_time)
+```
+### Data Frame  
+```{r dataframe}
+df <- data.frame(x = 1:5, y = 5:1)
+typeof(df)
+attributes(df)
+
+df_2 <- data.frame(
+  id = c("A", "B", "C"),
+  gender = factor(c("F", "M", "F")),
+  grade = c(60, 70, 70)
+)
+typeof(df_2)
+class(df_2)
+str(df_2) # show the structure: 3 observations of 2 variables 
+```
+#### Subsetting data frame  
+In R, `&` represent **AND**, `|` represents **OR**
+```{r subsetting-dataframe}
+class(df_2$grade) # use $ to extract single column; equivalent to df_2[[2]]
+typeof(df_2$grade)
+mean(df_2$grade)
+hist(df_2$grade)
+
+class(df_2[2]) 
+typeof(df_2[2])
+# mean(df_2[2])
+# hist(df_2[2])
+
+class(df_2[c(1,2)]) # extract multiple columns 
+typeof(df_2[c(1,2)])
+
+class(df_2[,c(1,2)]) # extract multiple columns
+typeof(df_2[,c(1,2)])
+
+class(df_2[,1:2]) # extract multiple columns
+typeof(df_2[,1:2])
+
+class(df_2[c("id", "grade")]) # extract multiple columns
+typeof(df_2[c("id", "grade")])
+
+class(df_2[1,2]) # extract value from a single cell [rows, columns]
+typeof(df_2[1,2])
+
+class(df_2[1,]) # extract row [rows, ]
+typeof(df_2[1,])
+
+class(df_2[,2]) # extract column [, column]
+typeof(df_2[,2])
+
+df_2[c(1,3), c(1,2)] # select the 1st & 3rd row, 1st and second column 
+
+df_2[df_2$grade == 70, ] # select the rows where grade is 70
+
+df_2[df_2$grade == 70 & df_2$gender == "M", ] # select the rows where grade is 70 and gender is M
+# run filter from dplyr package 
+# dplyr::filter() 
+```
+
+### Tibbles  
+```{r tibbles}
+tib <- tibble::tibble(x = 1:5, y = 5:1)
+typeof(tib)
+attributes(tib)
+```
+
+## Import and Export 
+```{r import-and-export}
+# Apply Mobility.csv file is download from https://sicss.io/boot_camp/ under visualization 
+apple_mobility <- read.csv("data/apple_mobility_data.csv") # default: header = TRUE, sep = ",",
+head(apple_mobility)[, c(1,2,3,4,5)]
+str(apple_mobility[, c(1,2,3,4,5)])
+
+library("writexl") 
+write_xlsx(df_2, "df_2.xlsx",col_names = TRUE)
+write.csv(df_2, "df_2.csv")
+```
+# Getting Help
+
+
+
+
+
