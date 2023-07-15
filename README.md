@@ -5,9 +5,9 @@ These are the materials for [SICSS-Howard/Mathematica 2023](https://sicss.io/202
 They are inspired by and borrow from [Jae Yeon Kim's version](https://github.com/jaeyk/sicss-howard-r-boot-camp/tree/main) from [SICSS-Howard/Mathematica 2021](https://sicss.io/2021/howard-mathematica/)
 
 # Reference
+[Computational Thinking for Social Science](https://jaeyk.github.io/comp_thinking_social_science)   
 [R for Data Science](https://r4ds.had.co.nz/index.html)  
 [Time Series analysis and its applications](https://link.springer.com/book/10.1007/978-3-319-52452-8)  
-[Computational Thinking for Social Science](https://jaeyk.github.io/comp_thinking_social_science)  
 [The R Project for Statistical Computing](https://www.r-project.org/about.html)   
 [R language definition](https://stat.ethz.ch/R-manual/R-devel/doc/manual/R-lang.html)  
 [Operators in R](https://www.javatpoint.com/r-operators)  
