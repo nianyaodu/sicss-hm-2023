@@ -1,0 +1,7 @@
+---
+title: 'Day2. Making Computational Methods Accessible: Modeling and Visualization'
+author: "nianyao_du"
+date: "2023-07-13"
+output: html_document
+---
+
