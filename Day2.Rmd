@@ -20,7 +20,8 @@ pacman::p_load(
   patchwork, # arranging ggplots
   broom, # tidying model outputs
   ISLR2, # ml dataset
-  tree # tree 
+  tree, # tree 
+  fpp3 # ts
 )
 ```
 # Tidyr  
@@ -596,10 +597,27 @@ plot(tree.carseats)
 # can also improve the prediction via cross-validation (find the optimal level of tree complexity) 
 ```
 
+## Example 4  
+This example is from [Forecasting: Principles and Practice](https://otexts.com/fpp3)  
+```{r example4-1, warning=F}
+aus_retail |>
+  filter(`Series ID`=="A3349640L") |>
+  autoplot(Turnover) # the pipe operator provides the result of the LHS as the first argument of the RHS
 
+aus_retail |>
+  filter(`Series ID`=="A3349640L") |>
+  model(ETS(Turnover)) |>
+  forecast(h = "2 years")
+```
 
-
-
+```{r example4-2}
+google_2015 <- gafa_stock |>
+  filter(Symbol == "GOOG", year(Date) == 2015)
+google_2015 |> ACF(Close) |>
+  autoplot() + labs(subtitle = "Google closing stock price")
+google_2015 |> ACF(difference(Close)) |>
+    autoplot() + labs(subtitle = "Changes in Google closing stock price")
+```
 
 
 
