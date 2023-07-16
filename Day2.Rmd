@@ -1,0 +1,612 @@
+---
+title: 'Day2. Making Computational Methods Accessible: Modeling and Visualization'
+author: "Amber Du"
+date: "July 16, 2023"
+output: html_document
+---
+# Tidyverse 
+## Setup  
+```{r}
+# pkgs <- c()
+if (!require("pacman")) install.packages("pacman")
+
+pacman::p_load(
+  tidyverse, # the tidyverse framework
+  here, # computational reproducibility
+  gapminder, # toy data
+  nycflights13, # for exercise
+  ggthemes, # additional themes
+  ggrepel, # annotating ggplot with text 
+  patchwork, # arranging ggplots
+  broom, # tidying model outputs
+  ISLR2, # ml dataset
+  tree # tree 
+)
+```
+# Tidyr  
+## Tidy data vs. messy data 
+This section follows [Data tidying from Data Science with R](https://garrettgman.github.io/tidying/)   
+```{r tidydata-messydata}
+table1
+table2
+table3
+table4a
+table4b
+```
+
+## Reshaping: wide to long 
+```{r reshaping-table4a}
+# ?tidyr::gather
+table4a 
+table4a %>% 
+  gather(key='year', # column name 
+         value='cases', # value in the key-value-pair
+         c('1999', '2000')) # the columns you think are wrong
+
+# tidyr::pivot_longer - more intuitive way for gather
+table4a %>% 
+  pivot_longer(
+    cols=c('1999', '2000'), # the columns you want to convert to observations: 1999 and 2000 are not variables - should be converted to observation
+    names_to=c('year'), # the name for column containing 1999, 2000 information 
+    values_to='cases' # values are re-organized into one column called cases
+  )
+
+as.numeric("2000")
+as.numeric("2000y")
+parse_number("2000")
+parse_number("2000y")
+parse_number("thisisyear2000")
+```
+
+### Reshaping: wide to long - Billboard Example
+This example is taken from [`pivot` function vigenette](https://tidyr.tidyverse.org/articles/pivot.html)
+```{r reshaping-wide2long-billboard-example-1}
+billboard
+```
+```{r reshaping-wide2long-billboard-example-2}
+# gather function 
+# x %>% f(y) turns into f(x, y), and x %>% f(y) %>% g(z) turns into g(f(x, y), z)
+
+billboard %>%
+  gather(
+    key='week',
+    value='rank',
+    starts_with("wk")
+  ) %>% # Use regular expressions
+  drop_na() # drop NAs
+
+# pivot_longer 
+billboard %>% 
+  pivot_longer(
+    cols=starts_with('wk'), # the columns you want to convert to observations; this is the same as c('wk1', 'wk2', ..., 'wk20', ...)
+    names_to=c('week'), # the name for column containing week information 
+    values_to='rank', # values are re-organized into one column called rank
+    values_drop_na = TRUE # drop rows that correspond to missing values.
+  )
+
+billboard %>% 
+  pivot_longer(
+    cols=starts_with('wk'), # the columns you want to convert to observations
+    names_to=c('week'), # the name for column containing week information 
+    names_prefix = "wk", # remove matching text from the start of each variable name
+    values_to='rank', # values are re-organized into one column called rank
+    values_drop_na = TRUE # drop rows that correspond to missing values.
+  )
+
+billboard %>% 
+  pivot_longer(
+    cols=starts_with('wk'), # the columns you want to convert to observations
+    names_to=c('week'), # the name for column containing week information 
+    names_prefix='wk', # remove matching text from the start of each variable name
+    names_transform=as.integer, # convert character to integer 
+    values_to='rank', # values are re-organized into one column called rank
+    values_drop_na = TRUE # drop rows that correspond to missing values.
+  )
+
+billboard %>% 
+  pivot_longer(
+    cols=starts_with('wk'), # the columns you want to convert to observations
+    names_to=c('week'), # the name for column containing week information 
+    names_prefix='wk', # remove matching text from the start of each variable name
+    names_transform=list(week=as.integer), # convert character to integer 
+    values_to='rank', # values are re-organized into one column called rank
+    values_drop_na = TRUE # drop rows that correspond to missing values.
+  )
+
+billboard %>% 
+  pivot_longer(
+    cols=starts_with('wk'), # the columns you want to convert to observations
+    names_to=c('week'), # the name for column containing week information 
+    names_transform=readr::parse_integer, # drops non-numeric component from column 'week'
+    values_to='rank', # values are re-organized into one column called rank
+    values_drop_na = TRUE # drop rows that correspond to missing values.
+  )
+```
+
+## Reshaping: long to wide  
+### Reshaping: long to wide - table2 Example
+```{r reshaping-long2wide-table2-example-1}
+table2
+```
+```{r reshaping-long2wide-table2-example-2}
+# spread function 
+table2 %>%
+  spread(
+    key=type,
+    value=count
+  )
+
+# pivot_wider function 
+table2 %>% 
+  pivot_wider(
+    names_from = type, # take keys from the original "type" column --> creating new columns and column names are from the original "type" column 
+    values_from = count # take values from the original "count" column 
+  )
+```
+
+## Missing value  
+This section below comes from [Section 12 of R for Data Science](https://r4ds.had.co.nz/tidy-data.html)
+**Implicit missing value**: not in the data    
+**Explicit missing value**: flagged with NA   
+```{r missing-value}
+# check missing value 
+is.na(NA)
+
+stocks <- tibble(
+  year= c(2022, 2022, 2022, 2022, 2023, 2023, 2023),
+  qtr=c(1,2,3,4,2,3,4),
+  return=c(1, 1, 2, NA, 2, 1, 3)
+)
+```
+Implicit missing value becomes explicit.  
+```{r missing-value-long2wide}
+stocks %>%
+  pivot_wider(
+    names_from = year, # 2022 and 2023 are transformed to column names as new attributes 
+    values_from = return
+  )
+
+# can also use complete() 
+stocks %>% 
+  complete(
+    year, qtr
+  )
+```
+Explicit missing value becomes implicit 
+```{r missing-value-wide2long}
+stocks %>% 
+  pivot_wider(
+    names_from = year, 
+    values_from = return) %>% 
+  pivot_longer(
+    cols = c("2022", "2023"), 
+    names_to = "year", 
+    values_to = "return", 
+    values_drop_na = TRUE
+  )
+```
+```{r missing-value-filling}
+working_hour <- tibble(name=c("Person 1", NA, NA, "Person 2", NA, "Person 3", NA),
+                       hours = c(2, 5, 6, 7, 3, 4, 9))
+working_hour
+working_hour %>% fill(name)
+working_hour %>% fill(name, .direction ="up")
+```
+## Create dummy variables   
+```{r create-dummy-variables-1}
+fish_encounters
+```
+```{r create-dummy-variables-2, eval=FALSE}
+# create dummy variable 
+```
+
+## Separate  
+This section below comes from [Section 12 of R for Data Science](https://r4ds.had.co.nz/tidy-data.html)
+```{r separate-1}
+table3
+```
+```{r separate-2}
+table3 %>% 
+  separate(rate, into = c("cases", "population"))
+
+table3 %>% 
+  separate(rate, into = c("cases", "population"), sep="/")
+
+table3 %>% 
+  separate(rate, into = c("cases", "population"), sep="/", convert=TRUE)
+
+table3 %>% 
+  separate(year, into = c("century", "year"), sep = 2)
+```
+## Unit 
+```{r unit-1}
+table5
+table5 %>% 
+  unite(
+    col="new_year",
+    c("century","year"),
+    sep = ""
+  )
+
+table5 %>% 
+  unite(
+    col="new_year",
+    c("century","year"),
+    sep = "",
+    remove=FALSE
+  )
+
+table5_2 <- data.table::copy(table5)
+table5_2[1,3] <- NA
+table5_2
+table5_2 %>% 
+  unite(
+    col="new_year",
+    c("century","year"),
+    sep = "",
+    remove=FALSE,
+    na.rm=TRUE
+  )
+```
+
+# dplyr  
+[Concept map for dplyr. By Monica Alonso, Greg Wilson.](https://education.rstudio.com/blog/2020/09/concept-maps/dplyr.png)
+## Arrange
+Reorder the rows (arrange())  
+```{r arrange}
+# mtcars example 
+mtcars %>% dplyr::arrange(desc(cyl))
+mtcars %>% dplyr::arrange(cyl) # increasing by default 
+mtcars %>% dplyr::arrange(cyl, disp) # increasing by default 
+```
+
+## Filter 
+Pick observations by their values (filter())   
+This example comes from [R for data science section 5](https://r4ds.had.co.nz/transform.html?q=arrange#dplyr-basics)
+```{r filter}
+str(flights)
+# select all the observations of flights departed NYC in January 
+jan_flights <- filter(flights, month == "1") # need to save the input 
+
+# multiple conditions - AND
+(jan1st_flights <- flights %>% filter(
+  month==1,
+  day==1
+))
+
+flights %>% filter( # same as above 
+  month==1 & day==1
+)
+
+
+# multiple conditions - OR
+(dec_jan_flights <- flights %>% filter(
+  month == 1 | month == 12
+))
+filter(flights, month %in% c(1, 12))
+
+# dimension change 
+dim(flights) # row, column 
+
+(flights %>% filter(
+  month == 1 | month == 12
+) %>% dim()) # dimension of returned data set 
+
+(flights %>% filter(
+  month == 1 | month == 12
+) %>% nrow()) # number of rows 
+
+(flights %>% filter(
+  month == 1 | month == 12
+) %>% ncol()) # number of columns 
+```
+```{r filter-2}
+# conditions - character 
+
+# filter eye_colors including "blue"; grepl is a base R function
+unique(starwars$eye_color)
+starwars %>%
+  filter(grepl("blue", tolower(eye_color)))
+
+# filter eye_colors including "blue"; dplyr way
+starwars %>%
+  filter(str_detect(tolower(eye_color), "blue"))
+
+# filter "red,blue" and blue hair_color
+starwars %>%
+  filter(eye_color %in% c("red, blue", "blue"))
+```
+
+```{r filter-3}
+# row with missing values: select rows from year == 00 
+table5_2 %>% filter(
+  year == "00"
+)
+
+table5_2 %>% filter(
+  year == "00" | is.na(year)
+)
+```
+## Slice 
+```{r slice}
+starwars %>%
+  arrange(desc(height)) %>%
+  slice(1:6) # first six rows 
+```
+## Slice by proportion and number 
+```{r slice-by-preportion-number}
+set.seed(716)
+
+# select 20 percent of observations from starwars 
+# starwars %>% nrow() * 0.2
+starwars %>%
+  slice_sample(
+    prop = 0.2,
+    replace = FALSE # SRS: TRUE
+  )
+# select 20 observatios froopm starwars with replacement 
+starwars %>%
+  slice_sample(
+    n = 20,
+    replace = TRUE
+  )
+# rows with minimum and maximum values of a variable
+starwars %>%
+  slice_max(height, n = 10) # 10 ppl who are the tallest 
+
+starwars %>%
+  slice_min(height, n = 10) # 10 ppl who are the shortest 
+```
+## Select 
+```{r select}
+# select the columns that include "color" in their name 
+starwars %>%
+  select(contains("color"))
+
+# select the columns that contains height or color in their name using grepl 
+starwars[grepl("height|color", names(starwars))]
+starwars %>% 
+  select(matches("height|color"))
+
+# select the columns which starts with "h"
+starwars %>% 
+  select(
+    starts_with("h")
+  )
+
+# select the columns which ends with "r"
+starwars %>% 
+  select(
+    ends_with("r")
+  )
+
+# select the columns which starts with h and ends with r 
+starwars %>%
+  select(starts_with("h") & ends_with("r"))
+
+# select column hair_color  
+starwars %>% 
+  select(hair_color)
+
+# select column hair_color and move it to the first column 
+starwars %>% 
+  select(hair_color, everything())
+
+# select columns based on options from a character vector 
+starwars %>% 
+  select(
+    any_of(c("hair_color", "gender"))
+  )
+```
+## clean messy column names 
+```{r clean-messy-col-name}
+messy_df <- tibble::tribble(~"ColNum1", ~"COLNUM2", ~ "COL & NUM3",
+                            1, 2, 3)
+messy_df
+pacman::p_load(janitor)
+janitor::clean_names(messy_df) 
+```
+
+## Mutate 
+Create new variables with functions of existing variables (mutate())  
+```{r}
+starwars %>%
+  select(name, mass, height, species) %>%
+  mutate(mass_height_ratio = mass /height)
+```
+## groupby and summarise 
+changes the scope of each function above from operating on the entire dataset to operating on it group-by-group.
+```{r groupby}
+# mean depay time for each day 
+flights %>% 
+  group_by(year, month, day) %>% 
+  summarise(delay=mean(dep_delay)) # if input has missing value, then output will also be NA 
+
+flights %>% 
+  group_by(year, month, day) %>% 
+  summarise(delay=mean(dep_delay, na.rm=TRUE))
+
+# multiple attributes in summarise 
+flights %>% 
+  group_by(year, month, day) %>% 
+  summarise(delay=mean(dep_delay, na.rm=TRUE),
+            n = n(),
+            n_not_na = sum(!is.na(dep_delay)))
+```
+Besides me function, there are other summary statistics available.   
+**Measures of spread**: `median(x)`, `sd(x)`, `IQR(x)`, `mad(x)`   
+**Measures of rank**: `min(x)`, `quantile(x, 0.25)`, `max(x)`  
+**Measures of position**: `first(x)`, `last(x)`, `nth(x, 2)`  
+**Measures of counts**: : `n(x)` (all rows), `sum(!is.na(x))` (only non-missing rows) = `n_distinct(x)`  
+**Counts and proportions of logical values**: `sum(condition about x)` (the number of TRUEs in x), `mean(condition about x)` (the proportion of TRUEs in x)  
+```{r}
+flights %>% 
+  group_by(year, month, day) %>% 
+  summarise(delay_IQR=IQR(dep_delay, na.rm=TRUE))
+```
+## rename  
+This example comes from [Rename Columns](https://dplyr.tidyverse.org/reference/rename.html)
+```{r rename}
+str(iris)
+rename(iris, petal_length = Petal.Length)
+iris %>% rename(
+  petal_length = Petal.Length
+)
+```
+
+## Key  
+```{r key}
+# if key is not provided 
+df <- tibble(
+  x = 0:10,
+  y = 10:20
+)
+df <- df %>% rowid_to_column("ID")
+df
+```
+# Modeling 
+This section comes from [Computational Thinking for Social Scientists](https://jaeyk.github.io/comp_thinking_social_science/tidy_data.html#modeling-broom)  
+
+## Nesting  
+
+### nest  
+```{r nesting-1}
+nested <- gapminder %>%
+  group_by(country, continent) %>%
+  nest()
+head(nested)
+nested$data %>% pluck(1)
+```
+```{r nesting-2}
+# run linear regression model for a data frame; the should be two columns of this df: lifeExp and year
+lm_model <- function(df) {
+  lm(lifeExp ~ year, data = df)
+}
+# apply lm_model to the nested data
+nested <- nested %>%
+  mutate(models = map(data, lm_model)) # add the list object as a new column
+head(nested)
+# view the model for 1st 
+nested$models[1]
+```
+
+### unnest 
+```{r glance}
+glanced <- nested %>%
+  mutate(glance = map(models, broom::glance))
+# pluck the first item on the list 
+glanced$glance %>% pluck(1) # same result as glanced$glance[[1]] 
+# pull p.value 
+glanced$glance %>% pluck(1) %>% pull(p.value) 
+# pull p.value - 2
+tmp <- glanced$glance %>% pluck(1)
+tmp[5]
+tmp$p.value
+```
+```{r unnest}
+glanced %>%
+  unnest(glance) %>%
+  arrange(r.squared) # default is increasing 
+```
+
+# Data visualization  
+## Example 1  
+This section comes from [Computational Thinking for Social Scientists](https://jaeyk.github.io/comp_thinking_social_science/tidy_data.html#modeling-broom)  
+```{r example1}
+p <- ggplot(
+  data = gapminder,
+  mapping = aes(x = gdpPercap, y = lifeExp)
+) 
+p
+p + geom_point() # scatter plot 
+p + geom_point() +geom_smooth() # geom_smooth has calculated a smoothed line;
+# the shaded area is the standard error for the line
+```
+## Example 2  
+This section comes from [Computational Thinking for Social Scientists](https://jaeyk.github.io/comp_thinking_social_science/tidy_data.html#modeling-broom)  
+```{r example2-1}
+ggplot(
+  data = gapminder,
+  mapping = aes(
+    x = gdpPercap, y = lifeExp,
+    size = pop,
+    color = continent
+  )
+) +
+  geom_point() +
+  scale_color_viridis_d()
+```
+```{r example2-2}
+ggplot(
+  data = gapminder,
+  mapping = aes(
+    x = gdpPercap, y = lifeExp,
+    color = continent
+  )
+) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = "loess", color = "red") +
+  labs(
+    x = "log GDP",
+    y = "Life Expectancy",
+    title = "A Gapminder Plot",
+    subtitle = "Data points are country-years",
+    caption = "Source: Gapminder"
+  )
+
+p <- ggplot(
+  data = gapminder,
+  mapping = aes(
+    x = gdpPercap, y = lifeExp,
+    color = continent,
+    fill = continent
+  )
+) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = "loess", color = "red") +
+  labs(
+    x = "log GDP",
+    y = "Life Expectancy",
+    title = "A Gapminder Plot",
+    subtitle = "Data points are country-years",
+    caption = "Source: Gapminder"
+  ) +
+  scale_color_viridis_d() +
+  scale_fill_viridis_d()
+
+ggsave("images/figure_example.png")
+```
+## Example 3  
+This example is from [An introduction to statistical learning](https://hastie.su.domains/ISLR2/ISLRv2_website.pdf).
+```{r example3-1, warning=FALSE}
+# classification tree predict high using all variables but Sales. 
+attach(Carseats)
+High <- factor(ifelse(Sales <= 8, "No", "Yes")) # Yes if the Sales variable exceeds 8
+set.seed(2)
+train <- sample(1:nrow(Carseats), 200) # split the observations into a training set and a test set
+Carseats.test <- Carseats[-train, ]
+High.test <- High[-train]
+tree.carseats <- tree(High ~ . - Sales, Carseats, subset = train) # build the tree using the training set
+tree.pred <- predict(tree.carseats, Carseats.test, type = "class") # evaluate its performance on the test data
+table(tree.pred, High.test)
+(104 + 50) / 200 # correct predictions for around 77 % of the locations in the test data set
+
+plot(tree.carseats)
+# text(tree.carseats)
+# can also improve the prediction via cross-validation (find the optimal level of tree complexity) 
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
