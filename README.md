@@ -16,6 +16,7 @@ They are inspired by and borrow from [Jae Yeon Kim's version](https://github.com
 [data visualization](https://socviz.co/)  
 [ggplot2](https://ggplot2-book.org/)  
 [An introduction to statistical learning](https://hastie.su.domains/ISLR2/ISLRv2_website.pdf)  
+[Forecasting: Principles and Practice](https://otexts.com/fpp3)    
 
 ## Cheatsheet 
 [A collection of cheatsheet](https://posit.co/resources/cheatsheets/)  
