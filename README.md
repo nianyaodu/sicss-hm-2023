@@ -12,6 +12,10 @@ They are inspired by and borrow from [Jae Yeon Kim's version](https://github.com
 [R language definition](https://stat.ethz.ch/R-manual/R-devel/doc/manual/R-lang.html)  
 [Operators in R](https://www.javatpoint.com/r-operators)  
 [Data Science with R](https://garrettgman.github.io/)   
+[pivoting](https://tidyr.tidyverse.org/articles/pivot.html)  
+[data visualization](https://socviz.co/)  
+[ggplot2]([ggplot2](https://ggplot2-book.org/))  
+[An introduction to statistical learning](https://hastie.su.domains/ISLR2/ISLRv2_website.pdf)  
 
 ## Cheatsheet 
 [A collection of cheatsheet](https://posit.co/resources/cheatsheets/)  
