@@ -14,7 +14,7 @@ They are inspired by and borrow from [Jae Yeon Kim's version](https://github.com
 [Data Science with R](https://garrettgman.github.io/)   
 [pivoting](https://tidyr.tidyverse.org/articles/pivot.html)  
 [data visualization](https://socviz.co/)  
-[ggplot2]([ggplot2](https://ggplot2-book.org/))  
+[ggplot2](https://ggplot2-book.org/)  
 [An introduction to statistical learning](https://hastie.su.domains/ISLR2/ISLRv2_website.pdf)  
 
 ## Cheatsheet 
